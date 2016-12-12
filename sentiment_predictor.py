@@ -51,7 +51,7 @@ def generate_data_train_test(data_train, f1, f2, data_test, f3, train_ratio = 0.
     vocab = defaultdict(float)
     # Pre-process train data set
     trainingsize = data_train.shape[0]  
-    trainingsize = 100
+    #trainingsize = 100
     for i in xrange(trainingsize):
         line = data_train[f1][i]
         y    = data_train[f2][i]
@@ -219,7 +219,7 @@ def learning():
     x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
     revs, W, word_idx_map, vocab = x[0], x[1], x[2], x[3]
     print "data loaded!"
-    datasets = make_idx_data(revs, word_idx_map, max_l=2633, kernel_size=5)
+    datasets = make_idx_data(revs, word_idx_map, max_l=2637, kernel_size=5)
 
     # Train data preparation
     N = datasets[0].shape[0]
@@ -383,10 +383,46 @@ def predict():
     print output
 
 
+def predict_text():
+    # read in index
+    x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
+    revs, W, word_idx_map, vocab = x[0], x[1], x[2], x[3]
+    # read in test file
+    with open("test.txt") as f:
+        lines = f.readlines()
+    # form dataset
+    data = []
+    for line in lines:
+        rev = get_idx_from_sent(line,word_idx_map,max_l=2633,kernel_size=5)
+        data.append(rev)
+
+    # load json and create model
+    with open('model_cnn_sentiment.json', 'r') as json_file:
+        loaded_model_json = json_file.read()
+    model = model_from_json(loaded_model_json)
+    # load weights into new model
+    model.load_weights("model_cnn_sentiment.h5")
+    print("Loaded model from disk")
+
+    opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
+    model.compile(loss='categorical_crossentropy', 
+                optimizer=opt,
+                metrics=['accuracy'])
+
+    data = np.asarray(data)
+
+
+    output = model.predict_proba(data, batch_size=10, verbose=1)
+    print output
+
+
+
+
 
 if __name__ == '__main__':
-    #preprocessing()
-    #learning()
+    preprocessing()
+    learning()
     predict()
+    predict_text()
 
 
