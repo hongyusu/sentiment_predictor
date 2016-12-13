@@ -368,7 +368,7 @@ def predict():
     
     x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
     revs, W, word_idx_map, vocab = x[0], x[1], x[2], x[3]
-    datasets = make_idx_data(revs, word_idx_map, max_l=2633, kernel_size=5)
+    datasets = make_idx_data(revs, word_idx_map, max_l=2637, kernel_size=5)
     conv_input_height = int(datasets[0].shape[1]-1)
     Nv = datasets[1].shape[0]
     val_X = np.zeros((Nv, conv_input_height), dtype=np.int)
@@ -393,26 +393,25 @@ def predict_text():
     # form dataset
     data = []
     for line in lines:
-        rev = get_idx_from_sent(line,word_idx_map,max_l=2633,kernel_size=5)
+        rev = get_idx_from_sent(line,word_idx_map,max_l=2637,kernel_size=5)
         data.append(rev)
+    print "data read!"
 
-    # load json and create model
+    # load model and parameters from file
     with open('model_cnn_sentiment.json', 'r') as json_file:
         loaded_model_json = json_file.read()
     model = model_from_json(loaded_model_json)
-    # load weights into new model
     model.load_weights("model_cnn_sentiment.h5")
-    print("Loaded model from disk")
 
     opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
     model.compile(loss='categorical_crossentropy', 
                 optimizer=opt,
                 metrics=['accuracy'])
-
     data = np.asarray(data)
-
+    print "model loaded!"
 
     output = model.predict_proba(data, batch_size=10, verbose=1)
+
     print output
 
 
@@ -420,9 +419,9 @@ def predict_text():
 
 
 if __name__ == '__main__':
-    preprocessing()
-    learning()
-    predict()
+    #preprocessing()
+    #learning()
+    #predict()
     predict_text()
 
 
