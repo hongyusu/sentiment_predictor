@@ -144,7 +144,7 @@ def get_W(word_vecs, k=300):
 
 
 
-def make_idx_data(revs, word_index_map, max_l=51, kernel_size=5):
+def make_index_data(revs, word_index_map, max_l=51, kernel_size=5):
     """
     Transforms sentences into a 2-d matrix.
     """
@@ -195,12 +195,10 @@ def preprocessing():
     print 'loading word2vec vectors...',
     
     # Load Google w2v file
-    w2v_file   = '/Users/hongyusu/Data/GoogleNews-vectors-negative300.bin'
-    w2v = load_google_w2v(w2v_file, vocab)
+    w2v = load_google_w2v('/Users/hongyusu/Data/GoogleNews-vectors-negative300.bin', vocab)
 
     print 'word2vec loaded!'
     print 'num words already in word2vec: ' + str(len(w2v))
-
 
     # add unknown word
     w2v = add_unknown_words(w2v, vocab) 
@@ -222,7 +220,7 @@ def learning():
     x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
     revs, W, word_index_map, vocab = x[0], x[1], x[2], x[3]
     print "data loaded!"
-    datasets = make_idx_data(revs, word_index_map, max_l=2637, kernel_size=5)
+    datasets = make_index_data(revs, word_index_map, max_l=2637, kernel_size=5)
 
     # Train data preparation
     N = datasets[0].shape[0]
@@ -350,7 +348,7 @@ def learning():
 
 
 
-def predict_val():
+def predict_validation():
     '''
     make prediction on validation data
     '''
@@ -371,18 +369,18 @@ def predict_val():
         if rev['split'] == 0:
             lines.append(rev['text'])
 
-    predict(lines,word_index_map,model)
+    predict_given_sentences(lines,word_index_map,model)
 
 
-def predict_text():
+def predict_lines(filename):
     """
-    make prediction on new input text
+    make prediction on multiple lines 
     """
     # read in index
     word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
 
     # read in test file
-    with open("test.txt") as f:
+    with open(filename) as f:
         lines = f.readlines()
     print "data read!"
 
@@ -395,10 +393,10 @@ def predict_text():
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
     # make prediction
-    predict(lines,word_index_map,model)
+    predict_given_sentences(lines,word_index_map,model)
 
 
-def predict(lines,word_index_map,model):
+def predict_given_sentences(lines,word_index_map,model):
     """
     make prediction given 
     1. lines of sentences
@@ -415,13 +413,45 @@ def predict(lines,word_index_map,model):
     output = model.predict_proba(data, batch_size=10, verbose=1)
     print output
 
+def predict_given_sentence(line,word_index_map,model):
+    """
+    make prediction given 
+    1. lines of sentences
+    2. word index map
+    3. model
+    """
+    # form dataset
+    data = np.asarray( [get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)] )
+    # prediction
+    output = model.predict_proba(data, batch_size=10, verbose=1)
+    print output
+
+def predict_line(line):
+    """
+    make prediction on a single line 
+    """
+    # read in index
+    word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
+
+    # load model and parameters from file
+    with open('model_cnn_sentiment.json', 'r') as json_file:
+        loaded_model_json = json_file.read()
+    model = model_from_json(loaded_model_json)
+    model.load_weights("model_cnn_sentiment.h5")
+    opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+
+    # make prediction
+    predict_given_sentence(line,word_index_map,model)
+
 
 
 
 if __name__ == '__main__':
-    preprocessing()
+    #preprocessing()
     #learning()
-    #predict_val()
-    predict_text()
+    #predict_validation()
+    predict_lines("test.txt")
+    predict_line("this is pretty stupid")
 
 
