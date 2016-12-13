@@ -132,25 +132,25 @@ def get_W(word_vecs, k=300):
     Get word matrix. W[i] is the vector for word indexed by i
     """
     vocab_size = len(word_vecs)
-    word_idx_map = dict()
+    word_index_map = dict()
     W = np.zeros(shape=(vocab_size+1, k), dtype=np.float32)
     W[0] = np.zeros(k, dtype=np.float32)
     i = 1
     for word in word_vecs:
         W[i] = word_vecs[word]
-        word_idx_map[word] = i
+        word_index_map[word] = i
         i += 1
-    return W, word_idx_map
+    return W, word_index_map
 
 
 
-def make_idx_data(revs, word_idx_map, max_l=51, kernel_size=5):
+def make_idx_data(revs, word_index_map, max_l=51, kernel_size=5):
     """
     Transforms sentences into a 2-d matrix.
     """
     train, val, test = [], [], []
     for rev in revs:
-        sent = get_idx_from_sent(rev['text'], word_idx_map, max_l, kernel_size)
+        sent = get_idx_from_sent(rev['text'], word_index_map, max_l, kernel_size)
         sent.append(rev['y'])
         if rev['split'] == 1:
             train.append(sent)
@@ -163,7 +163,7 @@ def make_idx_data(revs, word_idx_map, max_l=51, kernel_size=5):
     test = np.array(test, dtype=np.int)
     return [train, val, test]
 
-def get_idx_from_sent(sent, word_idx_map, max_l=51, kernel_size=5):
+def get_idx_from_sent(sent, word_index_map, max_l=51, kernel_size=5):
     """
     Transforms sentence into a list of indices. Pad with zeroes.
     """
@@ -173,8 +173,8 @@ def get_idx_from_sent(sent, word_idx_map, max_l=51, kernel_size=5):
         x.append(0)
     words = sent.split()
     for word in words:
-        if word in word_idx_map:
-            x.append(word_idx_map[word])
+        if word in word_index_map:
+            x.append(word_index_map[word])
     while len(x) < max_l+2*pad:
         x.append(0)
     return x
@@ -204,22 +204,25 @@ def preprocessing():
 
     # add unknown word
     w2v = add_unknown_words(w2v, vocab) 
-    W, word_idx_map = get_W(w2v)
+    W, word_index_map = get_W(w2v)
 
     # save dataset
-    cPickle.dump([revs, W, word_idx_map, vocab], open('imdb-train-val-test.pickle', 'wb'))
+    cPickle.dump([revs, W, word_index_map, vocab], open('imdb-train-val-test.pickle', 'wb'))
+    cPickle.dump(word_index_map, open('imdb-word-index-map.pickle', 'wb'))
     print 'dataset created!'
 
 
 
 
 def learning():
-
+    '''
+    perform learning
+    '''
     print "loading data..."
     x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
-    revs, W, word_idx_map, vocab = x[0], x[1], x[2], x[3]
+    revs, W, word_index_map, vocab = x[0], x[1], x[2], x[3]
     print "data loaded!"
-    datasets = make_idx_data(revs, word_idx_map, max_l=2637, kernel_size=5)
+    datasets = make_idx_data(revs, word_index_map, max_l=2637, kernel_size=5)
 
     # Train data preparation
     N = datasets[0].shape[0]
@@ -347,54 +350,40 @@ def learning():
 
 
 
-def predict():
+def predict_val():
     '''
-    predict on new sentences
+    make prediction on validation data
     '''
     # load json and create model
     with open('model_cnn_sentiment.json', 'r') as json_file:
         loaded_model_json = json_file.read()
     model = model_from_json(loaded_model_json)
-    # load weights into new model
     model.load_weights("model_cnn_sentiment.h5")
-    print("Loaded model from disk")
-
     opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
-    model.compile(loss='categorical_crossentropy', 
-                optimizer=opt,
-                metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
-
-    
+    #
     x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
-    revs, W, word_idx_map, vocab = x[0], x[1], x[2], x[3]
-    datasets = make_idx_data(revs, word_idx_map, max_l=2637, kernel_size=5)
-    conv_input_height = int(datasets[0].shape[1]-1)
-    Nv = datasets[1].shape[0]
-    val_X = np.zeros((Nv, conv_input_height), dtype=np.int)
-    val_Y = np.zeros((Nv, 2), dtype=np.int)
-    for i in xrange(Nv):
-        for j in xrange(conv_input_height):
-            val_X[i, j] = datasets[1][i, j]
-        val_Y[i, datasets[1][i, -1]] = 1
-        
+    revs, W, word_index_map, vocab = x[0], x[1], x[2], x[3]
 
-    output = model.predict_proba(val_X, batch_size=10, verbose=1)
-    print output
+    lines = []
+    for rev in revs:
+        if rev['split'] == 0:
+            lines.append(rev['text'])
+
+    predict(lines,word_index_map,model)
 
 
 def predict_text():
+    """
+    make prediction on new input text
+    """
     # read in index
-    x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
-    revs, W, word_idx_map, vocab = x[0], x[1], x[2], x[3]
+    word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
+
     # read in test file
     with open("test.txt") as f:
         lines = f.readlines()
-    # form dataset
-    data = []
-    for line in lines:
-        rev = get_idx_from_sent(line,word_idx_map,max_l=2637,kernel_size=5)
-        data.append(rev)
     print "data read!"
 
     # load model and parameters from file
@@ -402,26 +391,37 @@ def predict_text():
         loaded_model_json = json_file.read()
     model = model_from_json(loaded_model_json)
     model.load_weights("model_cnn_sentiment.h5")
-
     opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
-    model.compile(loss='categorical_crossentropy', 
-                optimizer=opt,
-                metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+
+    # make prediction
+    predict(lines,word_index_map,model)
+
+
+def predict(lines,word_index_map,model):
+    """
+    make prediction given 
+    1. lines of sentences
+    2. word index map
+    3. model
+    """
+    # form dataset
+    data = []
+    for line in lines:
+        rev = get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
+        data.append(rev)
     data = np.asarray(data)
-    print "model loaded!"
 
     output = model.predict_proba(data, batch_size=10, verbose=1)
-
     print output
 
 
 
 
-
 if __name__ == '__main__':
-    #preprocessing()
+    preprocessing()
     #learning()
-    #predict()
+    #predict_val()
     predict_text()
 
 
