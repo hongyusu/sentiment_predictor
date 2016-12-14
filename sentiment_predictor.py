@@ -1,6 +1,5 @@
 
-
-
+import os
 import numpy as np
 import pandas as pd
 import cPickle
@@ -15,11 +14,22 @@ from keras.optimizers import Adadelta
 from keras.constraints import unitnorm
 from keras.regularizers import l2
 from sklearn.metrics import roc_auc_score
-
-
-import tensorflow
+from keras import backend as K
+import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops 
-tensorflow.python.control_flow_ops = control_flow_ops
+tf.python.control_flow_ops = control_flow_ops
+
+
+import tweepy
+import sentiment_predictor
+
+CONSUMER_KEY = 'ncMZ2CP7YmScHkLYwmfCYaTZz'
+CONSUMER_SECRET = 'ZkFEJXxXEOUlqkhrJ14kzWakrXjqIe11de7ks28DyC79P31t9q'
+ACCESS_KEY = '1157786504-XB3DXGrMmhvM1PAb6aeys3LJFYI9Y3LzS6veRHj'
+ACCESS_SECRET = '8w69uDRm9PPA9iv3fNtkHPKP4FIq5SFtVbcE28wtcY5qx'
+auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+api = tweepy.API(auth)
 
 
 
@@ -369,20 +379,16 @@ def predict_validation():
         if rev['split'] == 0:
             lines.append(rev['text'])
 
-    predict_given_sentences(lines,word_index_map,model)
+    output = predict_given_sentences(lines,word_index_map,model)
+    return output
 
 
-def predict_lines(filename):
+def predict_lines(lines):
     """
     make prediction on multiple lines 
     """
     # read in index
     word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
-
-    # read in test file
-    with open(filename) as f:
-        lines = f.readlines()
-    print "data read!"
 
     # load model and parameters from file
     with open('model_cnn_sentiment.json', 'r') as json_file:
@@ -392,8 +398,10 @@ def predict_lines(filename):
     opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
+
     # make prediction
-    predict_given_sentences(lines,word_index_map,model)
+    output = predict_given_sentences(lines,word_index_map,model)
+    return output
 
 
 def predict_given_sentences(lines,word_index_map,model):
@@ -411,7 +419,7 @@ def predict_given_sentences(lines,word_index_map,model):
     data = np.asarray(data)
 
     output = model.predict_proba(data, batch_size=10, verbose=1)
-    print output
+    return output
 
 def predict_given_sentence(line,word_index_map,model):
     """
@@ -445,13 +453,108 @@ def predict_line(line):
     predict_given_sentence(line,word_index_map,model)
 
 
+def get_by_hashtag_in_file():
+    init = tf.initialize_all_variables()
+    with tf.Session() as sess:
+        # read in index
+        word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
+        # load model and parameters from file
+        with open('model_cnn_sentiment.json', 'r') as json_file:
+            loaded_model_json = json_file.read()
+        model = model_from_json(loaded_model_json)
+        model.load_weights("model_cnn_sentiment.h5")
+        opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
+
+
+        # get tweets
+        while True:
+            if os.path.isfile("hashtag.pickle"):
+                hashtag = cPickle.load(open("hashtag.pickle","rb"))
+                os.system("rm hashtag.pickle")
+                tweets = api.search(hashtag, count=5)
+                tweets = [tweet.text for tweet in tweets]
+                scores = predict_given_sentences(tweets,word_index_map,model)
+                scores = scores[:,1].tolist()
+
+                print "---> {}".format(hashtag)
+
+                res = {}
+                if tweets:
+                    res['status'] = 0
+                    res['items'] = tweets
+                    res['scores'] = scores
+                    res['meanscore'] = sum(scores)/len(scores)
+
+                cPickle.dump(res,open("hashtag_res.pickle","wb"))
+
+
+
+
+def get_by_hashtag(hashtag):
+    """
+    make prediction on multiple lines 
+    """
+
+
+
+    init = tf.initialize_all_variables()
+    with tf.Session() as sess:
+        #sess.run(init)
+
+        # read in index
+        word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
+
+        # load model and parameters from file
+        with open('model_cnn_sentiment.json', 'r') as json_file:
+            loaded_model_json = json_file.read()
+        model = model_from_json(loaded_model_json)
+        model.load_weights("model_cnn_sentiment.h5")
+        opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
+
+        # get tweets
+        tweets = api.search(hashtag, count=10)
+        tweets = [tweet.text for tweet in tweets]
+        #scores = predict_given_sentences(tweets,word_index_map,model)
+
+        data = []
+        for line in tweets:
+            rev = get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
+            data.append(rev)
+        data = np.asarray(data)
+        
+
+        scores = [0]
+        scores = model.predict_proba(data, batch_size=10, verbose=1)
+
+        
+        print scores 
+        res = {}
+        if tweets:
+            res['status'] = 0
+            res['items'] = tweets
+            res['scores'] = scores
+            res['meanscore'] = sum(scores)/len(scores)
+        return res
+
+
 
 
 if __name__ == '__main__':
     #preprocessing()
     #learning()
+
     #predict_validation()
-    predict_lines("test.txt")
-    predict_line("this is pretty stupid")
+
+    # read in test file
+    with open("test.txt") as f:
+        lines = f.readlines()
+    #print predict_lines(lines)
+
+    #predict_line("that is a cat.")
+
+    #get_by_hashtag("Finland")
+
+    get_by_hashtag_in_file()
+
 
 
