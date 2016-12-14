@@ -1,5 +1,6 @@
 
 import os
+import time
 import numpy as np
 import pandas as pd
 import cPickle
@@ -417,7 +418,8 @@ def predict_given_sentences(lines,word_index_map,model):
         rev = get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
         data.append(rev)
     data = np.asarray(data)
-
+    
+    # make prediction
     output = model.predict_proba(data, batch_size=10, verbose=1)
     return output
 
@@ -469,23 +471,33 @@ def get_by_hashtag_in_file():
         # get tweets
         while True:
             if os.path.isfile("hashtag.pickle"):
-                hashtag = cPickle.load(open("hashtag.pickle","rb"))
-                os.system("rm hashtag.pickle")
-                tweets = api.search(hashtag, count=5)
-                tweets = [tweet.text for tweet in tweets]
-                scores = predict_given_sentences(tweets,word_index_map,model)
-                scores = scores[:,1].tolist()
+                try:
+                    hashtag = cPickle.load(open("hashtag.pickle","rb"))
+                    os.system("rm hashtag.pickle")
+                    tweets = api.search(hashtag, count=50)
+                    tweets = [tweet.text for tweet in tweets]
+                    scores = predict_given_sentences(tweets,word_index_map,model)
+                    print scores
+                    scores = scores[:,1].tolist()
 
-                print "---> {}".format(hashtag)
+                    print "---> {}".format(hashtag)
 
-                res = {}
-                if tweets:
-                    res['status'] = 0
-                    res['items'] = tweets
-                    res['scores'] = scores
-                    res['meanscore'] = sum(scores)/len(scores)
+                    res = {}
+                    if tweets:
+                        res['status'] = 0
+                        res['items'] = tweets
+                        res['scores'] = scores
+                        res['meanscore'] = sum(scores)/len(scores)
 
-                cPickle.dump(res,open("hashtag_res.pickle","wb"))
+                    cPickle.dump(res,open("hashtag_res.pickle","wb"))
+
+                    i=0
+                    for score in scores:
+                        print score, tweets[i]
+                        i+=1
+
+                except:
+                    pass
 
 
 
@@ -494,7 +506,7 @@ def get_by_hashtag(hashtag):
     """
     make prediction on multiple lines 
     """
-
+    starttime = time.time()
 
 
     init = tf.initialize_all_variables()
@@ -503,6 +515,7 @@ def get_by_hashtag(hashtag):
 
         # read in index
         word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
+        print "read index", time.time()-starttime
 
         # load model and parameters from file
         with open('model_cnn_sentiment.json', 'r') as json_file:
@@ -510,24 +523,36 @@ def get_by_hashtag(hashtag):
         model = model_from_json(loaded_model_json)
         model.load_weights("model_cnn_sentiment.h5")
         opt = Adadelta(lr=1.0, rho=0.95, epsilon=1e-6)
+        print "load model",time.time()-starttime
+        starttime = time.time()
 
         # get tweets
-        tweets = api.search(hashtag, count=10)
+        tweets = api.search(hashtag, count=50)
         tweets = [tweet.text for tweet in tweets]
         #scores = predict_given_sentences(tweets,word_index_map,model)
+        print "get tweet",time.time()-starttime
+        starttime = time.time()
 
         data = []
         for line in tweets:
             rev = get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
             data.append(rev)
         data = np.asarray(data)
+        print "get tweet index",time.time()-starttime
+        starttime = time.time()
         
 
         scores = [0]
         scores = model.predict_proba(data, batch_size=10, verbose=1)
+        print "get prediction",time.time()-starttime
+        starttime = time.time()
 
         
-        print scores 
+        i = 0
+        for score in scores:
+            print score,tweets[i]
+            i+=1
+
         res = {}
         if tweets:
             res['status'] = 0
@@ -552,9 +577,9 @@ if __name__ == '__main__':
 
     #predict_line("that is a cat.")
 
-    #get_by_hashtag("Finland")
+    get_by_hashtag("bad")
 
-    get_by_hashtag_in_file()
+    #get_by_hashtag_in_file()
 
 
 
