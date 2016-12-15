@@ -29,18 +29,17 @@ def index(name=None):
 def action1(name=None):
     ht = request.get_json()
     cPickle.dump(ht,open("hashtag.pickle","wb"))
-    print "start ---> {}".format(ht)
+    print "---> {} : started".format(ht)
     #os.system("python sentiment_predictor.py")
     while True:
         if os.path.isfile("hashtag_res.pickle"):
             try:
                 data = cPickle.load(open("hashtag_res.pickle","r+"))
                 os.system("rm hashtag_res.pickle")
-                print "finish ---> {}".format(ht)
+                print "---> {} : ended".format(ht)
                 break
             except:
                 pass
-    print data
     return flask.jsonify(data)
 
 
@@ -48,7 +47,7 @@ def action1(name=None):
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    os.system("rm hashtag*; python sentiment_predictor.py &")
+    os.system("rm hashtag*; python wrapper_twitter.py &")
     app.run(host='0.0.0.0', port=port)
 
 

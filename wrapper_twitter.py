@@ -62,7 +62,7 @@ def operate_on_hashtag_cli(hashtag,amount=30):
     fetch a collection of tweets based on hashtag from file for which predictions are made 
     """
     tweets = get_tweets_given_hashtag(hashtag)
-    scores = predict_given_tweets(tweets,amount)
+    scores = predict_given_tweets(tweets)
     
     i = 0
     for score in scores:
@@ -110,12 +110,14 @@ def monitor_hashtag_pickle_files():
         if os.path.isfile("hashtag.pickle"):
             try:
                 hashtag = cPickle.load(open("hashtag.pickle","rb"))
+                print "---> {} : loaded".format(hashtag)
                 os.system("rm hashtag.pickle")
-                tweets = get_tweets_given_hashtag(hashtag,amount)
+                tweets = get_tweets_given_hashtag(hashtag,30)
+                print tweets
                 scores = predict_given_tweets(tweets)
                 scores = scores[:,1].tolist()
+                print "---> {} : scored".format(hashtag)
 
-                print "---> {}".format(hashtag)
 
                 res = {}
                 if tweets:
@@ -133,6 +135,6 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         monitor_hashtag_pickle_files()
     else:
-        #operate_on_hashtag_cli(sys.argv[1])
+        operate_on_hashtag_cli(sys.argv[1])
         #operate_on_hashtag_file(sys.argv[1])
 
