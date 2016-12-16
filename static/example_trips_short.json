@@ -1,0 +1,9 @@
+{
+    "options": 
+    [ 
+        { "totalPrice": 560.80, 
+          "trips": [ {"startCity": "Helsinki", "endCity": "Rome", "startTime": "2015-11-01 08:30", "endTime": "2015-11-01 10:30", "price": 200.90},
+                     {"startCity": "Rome", "endCity": "Paris", "startTime": "2015-11-04 14:30", "endTime": "2015-11-04 16:00", "price": 189.10}]
+        }
+    ]
+}
