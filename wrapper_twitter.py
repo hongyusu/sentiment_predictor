@@ -119,7 +119,7 @@ def monitor_hashtag_pickle_files():
                 hashtag = cPickle.load(open("hashtag.pickle","rb"))
                 print "---> {} : loaded".format(hashtag)
                 os.system("rm hashtag.pickle")
-                tweets = get_tweets_given_hashtag(hashtag,30)
+                tweets = get_tweets_given_hashtag(hashtag,20)
                 print tweets
                 scores = predict_given_tweets(tweets)
                 scores = scores[:,1].tolist()
