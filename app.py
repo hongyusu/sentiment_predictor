@@ -47,7 +47,8 @@ def action1(name=None):
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    os.system("rm hashtag*; python wrapper_twitter.py &")
+    #os.system("rm hashtag*; python wrapper_twitter.py &")
+    os.system("rm hashtag*")
     app.run(host='0.0.0.0', port=port)
 
 
