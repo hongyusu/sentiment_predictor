@@ -26,3 +26,4 @@ http://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.12.0rc0-cp27-non
 tweepy==3.5.0
 virtualenv==15.1.0
 Werkzeug==0.11.11
+Theano==0.8.2
