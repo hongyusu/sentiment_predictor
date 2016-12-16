@@ -12,6 +12,13 @@ from keras.models import Sequential
 from keras.models import model_from_json
 from keras.optimizers import Adadelta
 
+
+import tensorflow as tf
+sess = tf.Session()
+
+from keras import backend as K
+K.set_session(sess)
+
 tf.python.control_flow_ops = control_flow_ops
 
 CONSUMER_KEY = 'ncMZ2CP7YmScHkLYwmfCYaTZz'
