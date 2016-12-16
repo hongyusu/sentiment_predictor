@@ -1,3 +1,1 @@
-
-
-web: python app.py
+web: bin/web
