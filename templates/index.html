@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Sentiment analysis of hashtag
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script src="/static/util.js"></script>
+
+<style>
+  body{
+  background-color: #FFFAF0;
+  }
+
+  .anchor-time{
+  line-height: 1;
+  font-weight: bold;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+
+  .d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  }
+  
+  input.box{
+  width: 25%!important;
+  margin-right: 20px;
+  }
+
+  .cost_column{
+  line-height: 1;
+  font-weight: bold;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 24px;
+  }
+  
+  .cost_row:first{
+  color: #aaa;
+  }
+  
+  .cost_row{
+  color: #449D44;
+  }
+  .row_cover:hover{
+  cursor: pointer;
+  }
+  .row_cover.active{
+  fill: #C7E9F9;
+  }
+  .modal .row{
+  padding-left: 20px;
+  padding-right: 20px;
+  }
+
+
+	table {
+	  border-collapse: collapse;
+	}
+	th {
+	  border-bottom: 2px solid #ddd;
+	  padding: 8px;
+	  font-weight: bold;
+	}
+	td {
+	  padding: 8px;
+	  border-top: 1px solid #ddd;
+	}
+	#chart {
+	  padding: 0px;
+	}
+	.xaxislabel {
+	  font-size: 9px;
+	}
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="starter-template">
+  <h1><center>Twitter</center></h1>
+  <p class="lead"></p>
+</div>
+
+
+
+<form class="form-horizontal">
+  <div class='text-center'>
+    <h4>Hashtag</h4>
+    <input type="text" id="action1Input" placeholder="action1Input" value="Finland">
+  </div>
+  <div class="text-center">
+    <button id="action1" type="btn" class="btn">Search</button>
+  </div> 
+</form>
+
+<div id="" class="text-center">
+  <div class="starter-template">
+    <h4>Sentiment score</h4>
+    <div id="action1Meanscore"></div>
+  </div>
+</div>
+<div id="action1Plots"></div>
+
+
+
+</div>
+
+<script src="/static/app.js"></script>
+
+{% include 'modal.html' %}
+
+{% endblock %}
+
+
+

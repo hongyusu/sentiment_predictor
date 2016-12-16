@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    {% block head %}
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/sunny/jquery-ui.css?v=732deeeb935d">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>    
+    
+    <title>{% block title %}{% endblock %} - sentimentX</title>
+    {% endblock %}
+  </head>
+  <body>
+    <div class="container">      
+      <div id="content">{% block content %}{% endblock %}</div>
+      <div id="footer" class="text-center" style="margin-top: 50px">
+	{% block footer %}
+	&copy; Copyright 2015 by <a href="http://www.hongyusu.com/">Hongyu Su</a>.
+	{% endblock %}
+      </div>
+      
+    </div>
+  </body>
+</html>
