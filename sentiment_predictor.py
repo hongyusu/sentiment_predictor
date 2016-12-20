@@ -357,10 +357,48 @@ def learning():
 
 
 
+
+def predict_given_sentences(lines,word_index_map,model):
+    """
+    make prediction given 
+    1. lines of sentences
+    2. word index map
+    3. model
+    """
+    max_l=50
+    # form dataset
+    data = []
+    for line in lines:
+        rev = get_index_from_sent(line,word_index_map,max_l,kernel_size=5)
+        data.append(rev[1:max_l])
+    data = np.asarray(data)
+    
+    # make prediction
+    output = model.predict_proba(data, batch_size=10, verbose=1)
+    return output
+
+def predict_given_sentence(line,word_index_map,model):
+    """
+    make prediction given 
+    1. lines of sentences
+    2. word index map
+    3. model
+    """
+    max_l=50
+    # form dataset
+    data = np.asarray( [get_index_from_sent(line,word_index_map,max_l,kernel_size=5)] )
+    data = data[:,1:max_l]
+
+    # prediction
+    output = model.predict_proba(data, batch_size=10, verbose=1)
+    print output
+
+# wrapper
 def predict_validation():
     '''
     make prediction on validation data
     '''
+    print "validation"
     # load json and create model
     with open('model_cnn_sentiment.json', 'r') as json_file:
         loaded_model_json = json_file.read()
@@ -383,43 +421,12 @@ def predict_validation():
 
 
 
-def predict_given_sentences(lines,word_index_map,model):
-    """
-    make prediction given 
-    1. lines of sentences
-    2. word index map
-    3. model
-    """
-    # form dataset
-    data = []
-    for line in lines:
-        rev = get_index_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
-        data.append(rev)
-    data = np.asarray(data)
-    
-    # make prediction
-    output = model.predict_proba(data, batch_size=10, verbose=1)
-    return output
-
-def predict_given_sentence(line,word_index_map,model):
-    """
-    make prediction given 
-    1. lines of sentences
-    2. word index map
-    3. model
-    """
-    # form dataset
-    data = np.asarray( [get_index_from_sent(line,word_index_map,max_l=2637,kernel_size=5)] )
-    # prediction
-    output = model.predict_proba(data, batch_size=10, verbose=1)
-    print output
-
-
 # wrapper
 def predict_line(line):
     """
     make prediction on a single line 
     """
+    print "predict a line"
     # read in index
     word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
 
@@ -439,6 +446,7 @@ def predict_lines(lines):
     """
     make prediction on multiple lines 
     """
+    print "predict lines"
     # read in index
     word_index_map = cPickle.load(open("imdb-word-index-map.pickle", "rb"))
 
