@@ -155,13 +155,16 @@ def get_W(word_vecs, k=300):
 
 
 
-def make_index_data(revs, word_index_map, max_l=51, kernel_size=5):
+def make_index_data(revs, word_index_map, max_l=50, kernel_size=5):
     """
     Transforms sentences into a 2-d matrix.
     """
     train, val, test = [], [], []
     for rev in revs:
-        sent = get_idx_from_sent(rev['text'], word_index_map, max_l, kernel_size)
+        #sent = get_index_from_sent(rev['text'], word_index_map, max_l, kernel_size)
+        # TODO: modify constant 3000
+        sent = get_index_from_sent(rev['text'], word_index_map, 3000, kernel_size)
+        sent = sent[1:max_l]
         sent.append(rev['y'])
         if rev['split'] == 1:
             train.append(sent)
@@ -170,11 +173,11 @@ def make_index_data(revs, word_index_map, max_l=51, kernel_size=5):
         else:
             test.append(sent)
     train = np.array(train, dtype=np.int)
-    val = np.array(val, dtype=np.int)
-    test = np.array(test, dtype=np.int)
+    val   = np.array(val,   dtype=np.int)
+    test  = np.array(test,  dtype=np.int)
     return [train, val, test]
 
-def get_idx_from_sent(sent, word_index_map, max_l=51, kernel_size=5):
+def get_index_from_sent(sent, word_index_map, max_l=51, kernel_size=5):
     """
     Transforms sentence into a list of indices. Pad with zeroes.
     """
@@ -231,7 +234,7 @@ def learning():
     x = cPickle.load(open("imdb-train-val-test.pickle", "rb"))
     revs, W, word_index_map, vocab = x[0], x[1], x[2], x[3]
     print "data loaded!"
-    datasets = make_index_data(revs, word_index_map, max_l=2637, kernel_size=5)
+    datasets = make_index_data(revs, word_index_map, max_l=50, kernel_size=5)
 
     # Train data preparation
     N = datasets[0].shape[0]
@@ -261,13 +264,10 @@ def learning():
             val_X[i, j] = datasets[1][i, j]
         val_Y[i, datasets[1][i, -1]] = 1
         
-
-
     # Number of feature maps (outputs of convolutional layer)
     N_fm = 300
     # kernel size of convolutional layer
     kernel_size = 5 
-
 
     sampleSize          = datasets[0].shape[0]
     featureSize         = datasets[0].shape[1] 
@@ -289,7 +289,6 @@ def learning():
                         W_constraint = unitnorm()))
                         
     # Reshape word vectors from Embedding to tensor format suitable for Convolutional layer
-    #model.add(Reshape((conv_input_height, conv_input_width, 1)))
     model.add(Reshape((1, conv_input_height, conv_input_width)))
 
     # first convolutional layer
@@ -298,8 +297,6 @@ def learning():
                             conv_input_width, 
                             border_mode='valid', 
                             W_regularizer=l2(0.0001)))
-                            
-
 
     # ReLU activation
     model.add(Activation('relu'))
@@ -308,9 +305,12 @@ def learning():
     model.add(MaxPooling2D(pool_size=(conv_input_height-kernel_size+1, 1)))
 
     model.add(Flatten())
+
     model.add(Dropout(1))
+
     # Inner Product layer (as in regular neural network, but without non-linear activation function)
     model.add(Dense(2))
+
     # SoftMax activation; actually, Dense+SoftMax works as Multinomial Logistic Regression
     model.add(Activation('softmax'))
 
@@ -324,9 +324,7 @@ def learning():
     val_acc = []
     val_auc = []
 
-
-
-    N_epoch = 1 
+    N_epoch = 3 
 
     for i in xrange(N_epoch):
         model.fit(train_X, train_Y, batch_size=50, nb_epoch=1, verbose=1)
@@ -415,7 +413,7 @@ def predict_given_sentences(lines,word_index_map,model):
     # form dataset
     data = []
     for line in lines:
-        rev = get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
+        rev = get_index_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
         data.append(rev)
     data = np.asarray(data)
     
@@ -431,7 +429,7 @@ def predict_given_sentence(line,word_index_map,model):
     3. model
     """
     # form dataset
-    data = np.asarray( [get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)] )
+    data = np.asarray( [get_index_from_sent(line,word_index_map,max_l=2637,kernel_size=5)] )
     # prediction
     output = model.predict_proba(data, batch_size=10, verbose=1)
     print output
@@ -535,7 +533,7 @@ def get_by_hashtag(hashtag):
 
         data = []
         for line in tweets:
-            rev = get_idx_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
+            rev = get_index_from_sent(line,word_index_map,max_l=2637,kernel_size=5)
             data.append(rev)
         data = np.asarray(data)
         print "get tweet index",time.time()-starttime
@@ -566,7 +564,8 @@ def get_by_hashtag(hashtag):
 
 if __name__ == '__main__':
     #preprocessing()
-    #learning()
+    learning()
+    exit()
 
     #predict_validation()
 
