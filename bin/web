@@ -1,2 +1,1 @@
-python app.py &
-python wrapper_twitter.py
+python app.py 
