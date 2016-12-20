@@ -134,6 +134,7 @@ def monitor_hashtag_pickle_files():
                     res['meanscore'] = sum(scores)/len(scores)
 
                 cPickle.dump(res,open("hashtag_res.pickle","wb"))
+                break
             except:
                 pass
 

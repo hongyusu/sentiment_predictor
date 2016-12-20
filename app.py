@@ -30,7 +30,7 @@ def action1(name=None):
     ht = request.get_json()
     cPickle.dump(ht,open("hashtag.pickle","wb"))
     print "---> {} : started".format(ht)
-    #os.system("python sentiment_predictor.py")
+    os.system("python wrapper_twitter.py")
     while True:
         if os.path.isfile("hashtag_res.pickle"):
             try:
