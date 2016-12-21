@@ -21,18 +21,6 @@ from tensorflow.python.ops import control_flow_ops
 tf.python.control_flow_ops = control_flow_ops
 
 
-import tweepy
-import sentiment_predictor
-
-CONSUMER_KEY = 'ncMZ2CP7YmScHkLYwmfCYaTZz'
-CONSUMER_SECRET = 'ZkFEJXxXEOUlqkhrJ14kzWakrXjqIe11de7ks28DyC79P31t9q'
-ACCESS_KEY = '1157786504-XB3DXGrMmhvM1PAb6aeys3LJFYI9Y3LzS6veRHj'
-ACCESS_SECRET = '8w69uDRm9PPA9iv3fNtkHPKP4FIq5SFtVbcE28wtcY5qx'
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-api = tweepy.API(auth)
-
-
 
 def clean_str(string):
     """
