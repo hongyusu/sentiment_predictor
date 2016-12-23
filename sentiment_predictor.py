@@ -1,4 +1,5 @@
 
+
 import os
 import time
 import numpy as np
@@ -14,10 +15,11 @@ from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.optimizers import Adadelta
 from keras.constraints import unitnorm
 from keras.regularizers import l2
-from sklearn.metrics import roc_auc_score
 from keras import backend as K
+from sklearn.metrics import roc_auc_score
 import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops 
+
 tf.python.control_flow_ops = control_flow_ops
 
 
@@ -354,6 +356,7 @@ def predict_given_sentences(lines,word_index_map,model):
     3. model
     """
     max_l=50
+
     # form dataset
     data = []
     for line in lines:
@@ -379,7 +382,7 @@ def predict_given_sentence(line,word_index_map,model):
 
     # prediction
     output = model.predict_proba(data, batch_size=10, verbose=1)
-    print output
+    return output
 
 # wrapper
 def predict_validation():
@@ -427,7 +430,7 @@ def predict_line(line):
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
     # make prediction
-    predict_given_sentence(line,word_index_map,model)
+    return predict_given_sentence(line,word_index_map,model)
 
 # wrapper
 def predict_lines(lines):
@@ -455,12 +458,12 @@ if __name__ == '__main__':
     #preprocessing()
     #learning()
 
-    predict_validation()
+    #predict_validation()
 
     # read in test file
     with open("test.txt") as f:
         lines = f.readlines()
-    print predict_lines(lines)
+    #print predict_lines(lines)
 
     print predict_line("that is a cat.")
 
