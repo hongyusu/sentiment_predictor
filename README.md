@@ -27,6 +27,44 @@ pip install h5py==2.6.0
 
 # Heroku
 
+1. Version control the following files with Git
+```bash
+.gitignore
+Procfile
+README.md
+app.py
+bin/web
+imdb-word-index-map.pickle
+model_cnn_sentiment.h5
+model_cnn_sentiment.json
+requirements.txt
+runtime.txt
+sentiment_predictor.py
+static/airports.json
+static/app.js
+static/display.js
+static/example_trips.json
+static/example_trips_short.json
+static/images/airplane68.png
+static/images/facebook.png
+static/images/flight.svg
+static/images/hotel.svg
+static/images/international.png
+static/images/loader.gif
+static/images/plate.png
+static/images/site.png
+static/images/site.svg
+static/images/two209.png
+static/partner.js
+static/util.js
+templates/index.html
+templates/layout.html
+templates/modal.html
+templates/results.html
+test.txt
+wrapper_twitter.py
+```
+
 ```bash
 git push -u heroku master
 ```
