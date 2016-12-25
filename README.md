@@ -1,11 +1,8 @@
 
 
+# Learning part 
  
-# Table of content
-* auto-gen TOC:
-{:toc}
-
-# Required Packages
+1. Required packages
 
 | Package    | Version   | Installation |
 |:----------:|:---------:|:------------:|
@@ -18,7 +15,7 @@
 | tweepy     | 3.5.0     |    PIP       |
 | h5py       | 2.6.0     |    PIP       |
 
-# Installation script
+2. Installation script for deep learning modules
 
 ```bash
 pip install keras==1.0.3       
@@ -30,47 +27,58 @@ pip install flask==0.11.1
 pip install tweep==3.5.0       
 pip install h5py==2.6.0
 ```
+# Web service part
 
-# Heroku
-
-1. Version control the following files with Git
+# Heroku deployment
+1. Install virtual environment
 ```bash
-.gitignore
-Procfile
-README.md
-app.py
-bin/web
-imdb-word-index-map.pickle
-model_cnn_sentiment.h5
-model_cnn_sentiment.json
-requirements.txt
-runtime.txt
-sentiment_predictor.py
-static/airports.json
-static/app.js
-static/display.js
-static/example_trips.json
-static/example_trips_short.json
-static/images/airplane68.png
-static/images/facebook.png
-static/images/flight.svg
-static/images/hotel.svg
-static/images/international.png
-static/images/loader.gif
-static/images/plate.png
-static/images/site.png
-static/images/site.svg
-static/images/two209.png
-static/partner.js
-static/util.js
-templates/index.html
-templates/layout.html
-templates/modal.html
-templates/results.html
-test.txt
-wrapper_twitter.py
+sudo python install virtualenv
+``` 
+1. Set up a new virtual environment with name _venv_
+```bash
+virtualenv venv
 ```
-
+1. Activate the virtual environment
+```bash
+souce ./venv/Scripts/activate
+```
+1. Install all requirement Python packages
+```bash
+pip install keras==1.0.3       
+pip install theano==0.8.2       
+pip install tensorflow==0.12.0rc0       
+pip install pandas==0.19.1       
+pip install sklearn==0.08.1       
+pip install flask==0.11.1       
+pip install tweep==3.5.0       
+pip install h5py==2.6.0
+```
+1. Create a dependency file _requirement.txt_ which include all packages and patterns. We do this via
+```bash
+pip freeze > requirement.txt
+```
+1. Tensorflow needs some special treatment (revision) to the requirement file. So remove the tensor flow line, something like
+```bash
+tensorflow==0.10.0
+```
+and add one line
+```bash
+https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp27-none-linux_x86_64.whl
+```
+1. Create a _runtime.txt_ file and add the following line to declare python version used in this web app
+```bash
+python-2.7.12
+```
+1. Create a _Procfile_ file and add the following line to specify how to run the application when deployed
+```bash
+web: bin/web
+```
+also create the _bin/web_ file with the following content
+```bash
+python app.py
+```
+1. Version control via Git all required files. 
+1. Push to Heroku repository 
 ```bash
 git push -u heroku master
 ```
