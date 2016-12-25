@@ -1,6 +1,8 @@
 
 
-# Learning part 
+# Deep Learning for sentiment analysis 
+
+The sentiment predictor is built with a Convolutional Neural Network model realized by Keras API running Tensorflow as backend. The feature embedding is using pretrained sentiment140 model.
  
 1. Required packages
 
@@ -27,9 +29,13 @@ pip install flask==0.11.1
 pip install tweep==3.5.0       
 pip install h5py==2.6.0
 ```
-# Web service part
 
-# Heroku deployment
+# Web service 
+
+Web service is built with Python Flask.
+
+# Deploy to Heroku 
+
 1. Install virtual environment
 ```bash
 sudo python install virtualenv
