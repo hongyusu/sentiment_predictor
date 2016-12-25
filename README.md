@@ -14,7 +14,7 @@
 
 # Installation script
 
-'''bash
+```bash
 pip install keras==1.0.3       
 pip install theano==0.8.2       
 pip install tensorflow==0.12.0rc0       
@@ -23,7 +23,7 @@ pip install sklearn==0.08.1
 pip install flask==0.11.1       
 pip install tweep==3.5.0       
 pip install h5py==2.6.0
-'''
+```
 
 # Heroku
 
