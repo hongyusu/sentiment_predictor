@@ -37,18 +37,25 @@ Web service is built with Python Flask.
 # Deploy to Heroku 
 
 1. Install virtual environment
+
    ```bash
    sudo python install virtualenv
    ``` 
+
 1. Set up a new virtual environment with name _venv_
+
    ```bash
    virtualenv venv
    ```
+
 1. Activate the virtual environment
+
    ```bash
    souce ./venv/Scripts/activate
    ```
+
 1. Install all requirement Python packages
+
    ```bash
    pip install keras==1.0.3       
    pip install theano==0.8.2       
@@ -59,32 +66,47 @@ Web service is built with Python Flask.
    pip install tweep==3.5.0       
    pip install h5py==2.6.0
    ```
+
 1. Create a dependency file _requirement.txt_ which include all packages and patterns. We do this via
+
    ```bash
    pip freeze > requirement.txt
    ```
+
 1. Tensorflow needs some special treatment (revision) to the requirement file. So remove the tensor flow line, something like
+
    ```bash
    tensorflow==0.10.0
    ```
+
    and add one line
+
    ```bash
    https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp27-none-linux_x86_64.whl
    ```
+
 1. Create a _runtime.txt_ file and add the following line to declare python version used in this web app
+
    ```bash
    python-2.7.12
    ```
+
 1. Create a _Procfile_ file and add the following line to specify how to run the application when deployed
+
    ```bash
    web: bin/web
    ```
+
    also create the _bin/web_ file with the following content
+
    ```bash
    python app.py
    ```
+
 1. Version control via Git all required files. 
+
 1. Push to Heroku repository 
+
    ```bash
    git push -u heroku master
    ```
