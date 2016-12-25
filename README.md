@@ -13,6 +13,7 @@
 | h5py       | 2.6.0     |    PIP       |
 
 # Installation script
+
 '''bash
 pip install keras==1.0.3       
 pip install theano==0.8.2       
@@ -24,6 +25,11 @@ pip install tweep==3.5.0
 pip install h5py==2.6.0
 '''
 
+# Heroku
+
+```bash
+git push -u heroku master
+```
 
 
 
